@@ -31,7 +31,7 @@ namespace InnerDb.Tests
 
         private void ResetClient()
         {
-            client = new InnerDbClient(TestDbName, new string[] { "InnerDb.Tests" });
+            client = new InnerDbClient(TestDbName);
         }
 
         [Test]
@@ -105,7 +105,7 @@ namespace InnerDb.Tests
             int swordId = client.PutObject(murasame);
             int creatureId = client.PutObject(lavos);
 
-            this.ResetClient();
+            this.ResetClient(); // Like reconnecting
             
             var actualSword = client.GetObject<Sword>(swordId);
             Assert.AreEqual(murasame, actualSword);

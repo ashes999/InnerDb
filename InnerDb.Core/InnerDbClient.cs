@@ -12,9 +12,9 @@ namespace InnerDb.Core
         private InMemoryDataStore memoryStore;
         private FileDataStore fileStore;
 
-        public InnerDbClient(string databaseName, string[] objectTypeAssemblyNames = null)
+        public InnerDbClient(string databaseName)
         {
-            fileStore = new FileDataStore(databaseName, objectTypeAssemblyNames);
+            fileStore = new FileDataStore(databaseName);
             memoryStore = new InMemoryDataStore(fileStore);
         }
 
