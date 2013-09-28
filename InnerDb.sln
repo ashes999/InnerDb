@@ -3,6 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnerDb.Core", "InnerDb.Core\InnerDb.Core.csproj", "{7E68CA50-6617-4B65-BECF-EEA38C7E1FA4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnerDb.Tests", "InnerDb.Tests\InnerDb.Tests.csproj", "{4F54A799-26C1-4511-9D8D-EB64E1A6645C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5A677389-CBEA-4220-908A-038339336AC8}"
+	ProjectSection(SolutionItems) = preProject
+		readme.md = readme.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +20,10 @@ Global
 		{7E68CA50-6617-4B65-BECF-EEA38C7E1FA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E68CA50-6617-4B65-BECF-EEA38C7E1FA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E68CA50-6617-4B65-BECF-EEA38C7E1FA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F54A799-26C1-4511-9D8D-EB64E1A6645C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F54A799-26C1-4511-9D8D-EB64E1A6645C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F54A799-26C1-4511-9D8D-EB64E1A6645C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F54A799-26C1-4511-9D8D-EB64E1A6645C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
