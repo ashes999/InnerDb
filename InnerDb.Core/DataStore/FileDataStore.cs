@@ -35,31 +35,26 @@ namespace InnerDb.Core.DataStore
 
         public T GetObject<T>(int id)
         {
-            if (!Directory.Exists(this.directoryName))
+			if (!Directory.Exists(this.directoryName) || !File.Exists(this.GetPathFor(id)))
             {
-                return default(T);
-            }
-            else
-            {
-                string json = File.ReadAllText(this.getPathFor(id));
+                return default(T);                        
+            } else {
+                string json = File.ReadAllText(this.GetPathFor(id));
                 json = json.Substring(json.IndexOf('\n')).Trim();
                 return JsonConvert.DeserializeObject<T>(json);
             }
         }
 
-        public int PutObject(object obj)
+        public void PutObject(object obj, int id)
         {
             if (!Directory.Exists(this.directoryName))
             {
                 Directory.CreateDirectory(this.directoryName);
             }
 
-            int id = nextId;
             var json = JsonConvert.SerializeObject(obj);
             string content = string.Format("{0}\n{1}", obj.GetType().FullName, json);
-            File.WriteAllText(this.getPathFor(id), content);
-            this.nextId++;
-            return id;
+            File.WriteAllText(this.GetPathFor(id), content);
         }
 
         public void DeleteDatabase()
@@ -71,9 +66,24 @@ namespace InnerDb.Core.DataStore
             }
         }
 
+		public void Delete(int id)
+		{
+			if (this.ObjectExists(id))
+			{
+				File.Delete(this.GetPathFor(id));
+			}
+		}
+
+		internal int GetKeyForNewObject(object obj)
+		{
+			int toReturn = this.nextId;
+			this.nextId++;
+			return toReturn;
+		}
+
         // This function should NEVER be called, except when seeding the memory DB
         // from the file system (we don't have anything except type names).
-        internal Dictionary<int, object> DataById
+        internal Dictionary<int, object> AllData
         {
             get
             {
@@ -124,9 +134,14 @@ namespace InnerDb.Core.DataStore
             throw new InvalidOperationException("Can't deserialize type of " + typeName + ". The assembly is not loaded into the current app domain.");
         }
 
-        private string getPathFor(int id)
-        {
-            return string.Format(@"{0}\{1}.json", this.directoryName, id);
-        }
-    }
+		private bool ObjectExists(int id)
+		{
+			return File.Exists(this.GetPathFor(id));
+		}
+
+		private string GetPathFor(int id)
+		{
+			return string.Format(@"{0}\{1}.json", this.directoryName, id);
+		}
+	}
 }

@@ -9,7 +9,9 @@ namespace InnerDb.Core
 {
     public class InnerDbClient
     {
+		// Cache-like device
         private InMemoryDataStore memoryStore;
+		// Primary source of truth
         private FileDataStore fileStore;
 
         public InnerDbClient(string databaseName)
@@ -26,16 +28,32 @@ namespace InnerDb.Core
         public T GetObject<T>(int id)
         {
             // TODO: if not in memory, get from disk and put in memory
-            return memoryStore.GetObject<T>(id);
+			if (memoryStore.HasObject(id)) {
+				return memoryStore.GetObject<T>(id);
+			} else {
+				return fileStore.GetObject<T>(id);
+			}
         }
 
-        public int PutObject(object obj) {
-            int toReturn = memoryStore.PutObject(obj);
+        public int PutObject(object obj, int id = 0) {
+			if (id == 0)
+			{
+				id = fileStore.GetKeyForNewObject(obj);
+			}
+			memoryStore.PutObject(obj, id);
             // TODO: write to journal here
-            fileStore.PutObject(obj);
+            fileStore.PutObject(obj, id);
             // TODO: verify journal here
-            return toReturn;
+            return id;
         }
+
+		public void Delete(int id)
+		{
+			memoryStore.Delete(id);
+			// TODO: journal: +delete
+			fileStore.Delete(id);
+			// TODO: verify journal
+		}
 
         public void DeleteDatabase()
         {

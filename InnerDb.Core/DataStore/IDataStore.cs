@@ -10,7 +10,8 @@ namespace InnerDb.Core.DataStore
     {
         List<T> GetCollection<T>();
         T GetObject<T>(int id);
-        int PutObject(object obj);
+        void PutObject(object obj, int id);
+		void Delete(int id);
         void DeleteDatabase();
     }
 }

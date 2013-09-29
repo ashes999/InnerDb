@@ -10,7 +10,6 @@ namespace InnerDb.Core.DataStore
     {
         // TODO: dictionary<type, ilist<t>> doesn't work well :(
         private Dictionary<int, object> data = new Dictionary<int, object>();
-        private int nextId = 1;
         private FileDataStore fileStore;
 
         public InMemoryDataStore(FileDataStore fileStore)
@@ -18,7 +17,7 @@ namespace InnerDb.Core.DataStore
             this.fileStore = fileStore;
 
             // Seed from the file store, preserving keys
-            foreach (var kvp in this.fileStore.DataById)
+            foreach (var kvp in this.fileStore.AllData)
             {
                 this.data[kvp.Key] = kvp.Value;
             }
@@ -51,20 +50,33 @@ namespace InnerDb.Core.DataStore
             }
         }
 
-        public int PutObject(object obj)
+        public void PutObject(object obj, int id)
         {
-            int toReturn = this.nextId;
-
             // TODO: if RAM is limited, dump something
-            this.data[this.nextId] = obj;
-            nextId = this.data.Keys.Max() + 1;
-            return toReturn;
+            this.data[id] = obj;
         }
 
         public void DeleteDatabase()
         {
             this.data.Clear();
-            this.nextId = 1;
         }
-    }
+
+		internal bool HasObject(int id)
+		{
+			return this.data.ContainsKey(id);
+		}
+
+
+		public void Delete(int id)
+		{
+			if (this.HasObject(id))
+			{
+				this.data.Remove(id);
+			}
+			else
+			{
+				throw new ArgumentException("There's no object with ID " + id + " to delete.");
+			}
+		}
+	}
 }

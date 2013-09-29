@@ -112,5 +112,38 @@ namespace InnerDb.Tests
             var actualCreature = client.GetObject<Creature>(creatureId);
             Assert.AreEqual(lavos, actualCreature);
         }
+
+		[Test]
+		public void DeleteDeletesObject()
+		{
+			int swordId = client.PutObject(masamune);
+			Assert.IsNotNull(client.GetObject<Sword>(swordId));
+			client.Delete(swordId);
+			Assert.IsNull(client.GetObject<Sword>(swordId));
+		}
+
+		[Test]
+		public void IdsAreNotReusedAfterDeletion()
+		{
+			int first = client.PutObject(masamune);
+			int second = client.PutObject(murasame);
+			client.Delete(second);
+			int third = client.PutObject(lavos);
+			Assert.AreNotEqual(second, third);
+		}
+
+		[Test]
+		public void PutObjectWithIdUpdatesObject()
+		{
+			int id = client.PutObject(masamune);
+			var expected = new Sword() { Name = "Excalibur", Cost = 1 };
+			client.PutObject(expected, id);
+			var actual = client.GetObject<Sword>(id);
+			Assert.AreEqual(expected, actual);
+
+			this.ResetClient();
+			actual = client.GetObject<Sword>(id);
+			Assert.AreEqual(expected, actual);
+		}
     }
 }
