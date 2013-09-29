@@ -22,16 +22,17 @@ namespace InnerDb.Tests
         private Sword murasame = new Sword { Name = "Murasame", Cost = 5000 };
         private dynamic lavos = new Creature() { Name = "Lavos", Disposition = Alignment.Evil };
 
+
+		private void ResetClient()
+		{
+			client = new InnerDbClient(TestDbName);
+		}
+
         [SetUp]
         public void ResetClientAndDeleteDatabase()
         {
             this.ResetClient();
             client.DeleteDatabase();
-        }
-
-        private void ResetClient()
-        {
-            client = new InnerDbClient(TestDbName);
         }
 
         [Test]
@@ -51,18 +52,27 @@ namespace InnerDb.Tests
         [Test]
         public void PutObjectReturnsNonZeroId()
         {
-            var actual = client.PutObject(new Sword() { Name = "Masamune", Cost = 10000 });
+            var actual = client.PutObject(masamune);
             Assert.Greater(actual, 0);
         }
 
         [Test]
-        public void GetReturnsPutObject()
+        public void GetByIdReturnsPutObject()
         {
-            var id = client.PutObject(new Sword() { Name = "Masamune", Cost = 10000 });
+            var id = client.PutObject(masamune);
             Assert.Greater(id, 0);
             var actual = client.GetObject<Sword>(id);
             Assert.AreEqual(masamune, actual);
         }
+
+		[Test]
+		public void GetByPredicateReturnsPutObject()
+		{
+			client.PutObject(masamune);
+			client.PutObject(murasame);
+			var actual = client.GetObject<Sword>(s => s.Name == "Masamune");
+			Assert.AreEqual(masamune, actual);
+		}
 
         [Test]
         public void GetCollectionReturnsPutObjects()
@@ -95,7 +105,7 @@ namespace InnerDb.Tests
         {
             var expected = new Creature() { Name = "Chrono", Disposition = Alignment.Good };
             int id = client.PutObject(expected);
-            var actual = client.GetObject<Creature>(id);
+            var actual = client.GetObject<Creature>(c => c.Name == "Chrono");
             Assert.AreEqual(Alignment.Good, actual.Disposition);
         }
 
@@ -117,7 +127,7 @@ namespace InnerDb.Tests
 		public void DeleteDeletesObject()
 		{
 			int swordId = client.PutObject(masamune);
-			Assert.IsNotNull(client.GetObject<Sword>(swordId));
+			Assert.IsNotNull(client.GetObject<Sword>(s => s.Name == "Masamune"));
 			client.Delete(swordId);
 			Assert.IsNull(client.GetObject<Sword>(swordId));
 		}
@@ -142,7 +152,7 @@ namespace InnerDb.Tests
 			Assert.AreEqual(expected, actual);
 
 			this.ResetClient();
-			actual = client.GetObject<Sword>(id);
+			actual = client.GetObject<Sword>(s => s.Name == "Excalibur");
 			Assert.AreEqual(expected, actual);
 		}
     }

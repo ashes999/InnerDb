@@ -22,6 +22,8 @@ namespace InnerDb.Core
 
         public List<T> GetCollection<T>()
         {
+			// TODO: if the lists are the same, just use memory
+			// How can we tell? Probably a hash or something.
             return memoryStore.GetCollection<T>();
         }
 
@@ -34,6 +36,11 @@ namespace InnerDb.Core
 				return fileStore.GetObject<T>(id);
 			}
         }
+
+		public T GetObject<T>(Func<T, bool> predicate)
+		{
+			return this.GetCollection<T>().First(obj => predicate.Invoke(obj) == true);
+		}
 
         public int PutObject(object obj, int id = 0) {
 			if (id == 0)
