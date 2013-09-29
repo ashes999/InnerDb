@@ -48,6 +48,7 @@
     <Compile Include="DataStore\IDataStore.cs" />
     <Compile Include="DataStore\InMemoryDataStore.cs" />
     <Compile Include="InnerDbClient.cs" />
+    <Compile Include="LocalDatabase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
