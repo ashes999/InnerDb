@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using InnerDb.Core.DataStore;
+using System.Timers;
 
 namespace InnerDb.Core
 {
@@ -11,12 +12,20 @@ namespace InnerDb.Core
 		private static LocalDatabase instance = new LocalDatabase();
 		public static LocalDatabase Instance { get { return instance; } }
 
-		// Cache-like device
         private InMemoryDataStore memoryStore;
 		// Primary source of truth
         private FileDataStore fileStore;
+		private Timer journalTimer = new Timer(TimeSpan.FromMilliseconds(100).TotalMilliseconds);
 
-		private LocalDatabase() { }
+		private LocalDatabase() {
+
+			this.journalTimer.Elapsed += (sender, args) =>
+			{
+				this.ProcessJournalEntries();
+			};
+
+			this.journalTimer.Start();
+		}
 
 		public void OpenDatabase(string databaseName)
         {
@@ -68,5 +77,9 @@ namespace InnerDb.Core
             this.memoryStore.DeleteDatabase();
             this.fileStore.DeleteDatabase();
         }
+
+		private void ProcessJournalEntries()
+		{
+		}
 	}
 }

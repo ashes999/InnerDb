@@ -31,9 +31,12 @@ namespace InnerDb.Tests
         [SetUp]
         public void ResetClientAndDeleteDatabase()
         {
-            this.ResetClient();
-            client.DeleteDatabase();
-        }
+			// Delete DB
+			this.ResetClient();
+			client.DeleteDatabase();
+			// Recreate DB
+			this.ResetClient();
+		}
 
         [Test]
         public void TrueIsTrue()

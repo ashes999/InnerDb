@@ -22,10 +22,11 @@ namespace InnerDb.Core.DataStore
                 .Replace("!", "").Replace("@", "").Replace("#", "")
                 .Replace("{", "").Replace("}", "").Replace("+", "");
 
-            if (!Directory.Exists(directoryName))
-            {
-                Directory.CreateDirectory(directoryName);
-            }
+			if (!Directory.Exists(directoryName))
+			{
+				Directory.CreateDirectory(directoryName);
+				Directory.CreateDirectory(string.Format(@"{0}\Data", directoryName));
+			}
         }
 
         public List<T> GetCollection<T>()
@@ -35,7 +36,7 @@ namespace InnerDb.Core.DataStore
 
         public T GetObject<T>(int id)
         {
-			if (!Directory.Exists(this.directoryName) || !File.Exists(this.GetPathFor(id)))
+			if (!File.Exists(this.GetPathFor(id)))
             {
                 return default(T);                        
             } else {
@@ -47,11 +48,6 @@ namespace InnerDb.Core.DataStore
 
         public void PutObject(object obj, int id)
         {
-            if (!Directory.Exists(this.directoryName))
-            {
-                Directory.CreateDirectory(this.directoryName);
-            }
-
             var json = JsonConvert.SerializeObject(obj);
             string content = string.Format("{0}\n{1}", obj.GetType().FullName, json);
             File.WriteAllText(this.GetPathFor(id), content);
@@ -91,7 +87,7 @@ namespace InnerDb.Core.DataStore
 
                 if (Directory.Exists(this.directoryName))
                 {
-                    string[] files = Directory.GetFiles(this.directoryName);
+                    string[] files = Directory.GetFiles(string.Format(@"{0}\Data", this.directoryName));
 
                     foreach (string filename in files)
                     {
@@ -141,7 +137,7 @@ namespace InnerDb.Core.DataStore
 
 		private string GetPathFor(int id)
 		{
-			return string.Format(@"{0}\{1}.json", this.directoryName, id);
+			return string.Format(@"{0}\Data\{1}.json", this.directoryName, id);
 		}
 	}
 }
