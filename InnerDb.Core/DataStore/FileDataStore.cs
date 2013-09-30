@@ -18,14 +18,12 @@ namespace InnerDb.Core.DataStore
         public FileDataStore(string databaseName)
         {
             // TODO: stop cluttering mah file system
-            this.directoryName = databaseName.Replace(" ", "")
-                .Replace("!", "").Replace("@", "").Replace("#", "")
-                .Replace("{", "").Replace("}", "").Replace("+", "");
+			this.directoryName = databaseName.SantizeForDatabaseName();
 
 			if (!Directory.Exists(directoryName))
 			{
 				Directory.CreateDirectory(directoryName);
-				Directory.CreateDirectory(string.Format(@"{0}\Data", directoryName));
+				Directory.CreateDirectory(string.Format(@"{0}\Data", directoryName));			
 			}
         }
 
@@ -47,10 +45,8 @@ namespace InnerDb.Core.DataStore
         }
 
         public void PutObject(object obj, int id)
-        {
-            var json = JsonConvert.SerializeObject(obj);
-            string content = string.Format("{0}\n{1}", obj.GetType().FullName, json);
-            File.WriteAllText(this.GetPathFor(id), content);
+        {            
+            File.WriteAllText(this.GetPathFor(id), obj.Serialize());
         }
 
         public void DeleteDatabase()
@@ -94,15 +90,8 @@ namespace InnerDb.Core.DataStore
                         int start = filename.LastIndexOf('\\') + 1;
                         int stop = filename.LastIndexOf(".json");
                         int id = int.Parse(filename.Substring(start, stop - start));
-                        string content = File.ReadAllText(filename);
-                        
-                        int pos = content.IndexOf('\n');
-                        string json = content.Substring(pos).Trim();
-                        string typeName = content.Substring(0, pos);
 
-                        var type = this.LoadType(typeName);
-                        var value = JsonConvert.DeserializeObject(json, type);
-                        toReturn[id] = value;
+						toReturn[id] = DatabaseHelper.Deserialize(filename);
                         if (id >= this.nextId)
                         {
                             this.nextId = id + 1;
@@ -114,20 +103,6 @@ namespace InnerDb.Core.DataStore
 
                 return toReturn;
             }
-        }
-
-        private Type LoadType(string typeName)
-        {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (var assembly in assemblies)
-            {
-                if (assembly.GetType(typeName) != null)
-                {
-                    return assembly.GetType(typeName);
-                }
-            }
-
-            throw new InvalidOperationException("Can't deserialize type of " + typeName + ". The assembly is not loaded into the current app domain.");
         }
 
 		private bool ObjectExists(int id)

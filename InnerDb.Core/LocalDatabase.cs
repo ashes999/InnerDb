@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using InnerDb.Core.DataStore;
-using System.Timers;
+using InnerDb.Core.Journal;
 
 namespace InnerDb.Core
 {
@@ -11,26 +11,18 @@ namespace InnerDb.Core
 	{
 		private static LocalDatabase instance = new LocalDatabase();
 		public static LocalDatabase Instance { get { return instance; } }
+		
+		private FileDataStore fileStore; // Primary source of truth
+		private FileJournal journal; 
+		private InMemoryDataStore memoryStore;
 
-        private InMemoryDataStore memoryStore;
-		// Primary source of truth
-        private FileDataStore fileStore;
-		private Timer journalTimer = new Timer(TimeSpan.FromMilliseconds(100).TotalMilliseconds);
-
-		private LocalDatabase() {
-
-			this.journalTimer.Elapsed += (sender, args) =>
-			{
-				this.ProcessJournalEntries();
-			};
-
-			this.journalTimer.Start();
-		}
+		private LocalDatabase() { }
 
 		public void OpenDatabase(string databaseName)
         {
             fileStore = new FileDataStore(databaseName);
-            memoryStore = new InMemoryDataStore(fileStore);
+			journal = new FileJournal(databaseName, fileStore);
+            memoryStore = new InMemoryDataStore(fileStore, journal.DirectoryPath);
         }
 
         public List<T> GetCollection<T>()
@@ -40,9 +32,12 @@ namespace InnerDb.Core
 
         public T GetObject<T>(int id)
         {
-			if (memoryStore.HasObject(id)) {
+			if (memoryStore.HasObject(id))
+			{
 				return memoryStore.GetObject<T>(id);
-			} else {
+			}
+			else
+			{
 				return fileStore.GetObject<T>(id);
 			}
         }
@@ -58,8 +53,7 @@ namespace InnerDb.Core
 				id = fileStore.GetKeyForNewObject(obj);
 			}
 			memoryStore.PutObject(obj, id);
-            // TODO: write to journal here
-            fileStore.PutObject(obj, id);
+			journal.RecordWrite(obj, id);
             // TODO: verify journal here
             return id;
         }
@@ -67,19 +61,25 @@ namespace InnerDb.Core
 		public void Delete(int id)
 		{
 			memoryStore.Delete(id);
-			// TODO: journal: +delete
-			fileStore.Delete(id);
+			journal.RecordDelete(id);
 			// TODO: verify journal
 		}
 
         public void DeleteDatabase()
         {
             this.memoryStore.DeleteDatabase();
-            this.fileStore.DeleteDatabase();
+			this.journal.DeleteDatabase();
+			this.fileStore.DeleteDatabase();
         }
 
-		private void ProcessJournalEntries()
+		internal void StopJournal()
 		{
+			this.journal.Stop();
+		}
+
+		internal void SetJournalIntervalMillseconds(uint milliseconds)
+		{
+			this.journal.JournalIntervalSeconds = milliseconds;
 		}
 	}
 }

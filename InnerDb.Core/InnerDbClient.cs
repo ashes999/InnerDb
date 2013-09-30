@@ -44,5 +44,15 @@ namespace InnerDb.Core
         {
 			this.database.DeleteDatabase();
         }
-    }
+
+		public void Stop()
+		{
+			this.database.StopJournal();
+		}
+
+		public void SetJournalIntervalMilliseconds(uint milliseconds)
+		{
+			this.database.SetJournalIntervalMillseconds(milliseconds);
+		}
+	}
 }

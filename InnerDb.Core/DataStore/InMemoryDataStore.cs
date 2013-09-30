@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using InnerDb.Core.Journal;
 
 namespace InnerDb.Core.DataStore
 {
@@ -12,7 +14,7 @@ namespace InnerDb.Core.DataStore
         private Dictionary<int, object> data = new Dictionary<int, object>();
         private FileDataStore fileStore;
 
-        public InMemoryDataStore(FileDataStore fileStore)
+        public InMemoryDataStore(FileDataStore fileStore, string journalDirectory)
         {
             this.fileStore = fileStore;
 
@@ -21,6 +23,17 @@ namespace InnerDb.Core.DataStore
             {
                 this.data[kvp.Key] = kvp.Value;
             }
+
+			// Seed any non-persisted puts from our journal
+			IEnumerable<string> putEntries = Directory.GetFiles(journalDirectory)
+				.Where(s => s.EndsWith(FileJournal.PutEntryPrefix));
+
+			foreach (string filename in putEntries)
+			{
+				int id = DatabaseHelper.GetIdFromFilename(filename);
+				var data = DatabaseHelper.Deserialize(filename);
+				this.data[id] = data;
+			}
         }
         
         public List<T> GetCollection<T>()

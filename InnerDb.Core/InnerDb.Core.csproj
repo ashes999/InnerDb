@@ -44,10 +44,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DatabaseHelper.cs" />
     <Compile Include="DataStore\FileDataStore.cs" />
     <Compile Include="DataStore\IDataStore.cs" />
     <Compile Include="DataStore\InMemoryDataStore.cs" />
     <Compile Include="InnerDbClient.cs" />
+    <Compile Include="Journal\FileJournal.cs" />
     <Compile Include="LocalDatabase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

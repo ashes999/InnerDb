@@ -8,14 +8,16 @@ using InnerDb.Core;
 using InnerDb.Core.DataStore;
 using InnerDb.Tests.TestHelpers;
 using NUnit.Framework;
+using System.IO;
 
 namespace InnerDb.Tests
 {
     [TestFixture]
     class InnerDbClientTest
     {
-        private readonly string TestDbName = "Test DB";
+        private readonly string TestDbName = "TestDB";
         private InnerDbClient client;
+		private readonly uint JournalInterval = 100;
 
         // Helper objects
         private Sword masamune = new Sword() { Name = "Masamune", Cost = 10000 };
@@ -25,16 +27,27 @@ namespace InnerDb.Tests
 
 		private void ResetClient()
 		{
+			if (client != null)
+			{
+				client.Stop();
+			}
 			client = new InnerDbClient(TestDbName);
+			client.SetJournalIntervalMilliseconds(JournalInterval);
 		}
 
         [SetUp]
         public void ResetClientAndDeleteDatabase()
         {
 			// Delete DB
-			this.ResetClient();
-			client.DeleteDatabase();
-			// Recreate DB
+			while (Directory.Exists(TestDbName))
+			{
+				try
+				{
+					Directory.Delete(TestDbName, true);
+				}
+				catch { }
+			}
+
 			this.ResetClient();
 		}
 
@@ -157,6 +170,48 @@ namespace InnerDb.Tests
 			this.ResetClient();
 			actual = client.GetObject<Sword>(s => s.Name == "Excalibur");
 			Assert.AreEqual(expected, actual);
+		}
+
+		[Test]
+		public void JournalWritesJournalFilesAndRunsThemOnStartup()
+		{
+			// Believe me when I say this is very heavily tested already from
+			// the above tests running really fast.
+			client.SetJournalIntervalMilliseconds(10000); // 10s is enough to test it...
+
+			int id = client.PutObject(murasame);
+			client.Delete(id);
+			int secondId = client.PutObject(masamune);
+
+			// White-box of sorts. Okay for now.
+			string journalDir = string.Format(@"{0}\Journal", TestDbName);
+			string dataDir = string.Format(@"{0}\Data", TestDbName);
+
+			string[] files = System.IO.Directory.GetFiles(journalDir);
+
+			Assert.AreEqual(3, files.Length);
+			Assert.IsTrue(files.Any(f => f.Contains(id + "-Put.json")));
+			Assert.IsTrue(files.Any(f => f.Contains(id + "-Delete.json")));
+			Assert.IsTrue(files.Any(f => f.Contains(secondId + "-Put.json")));
+
+			client.SetJournalIntervalMilliseconds(JournalInterval);
+			this.ResetClient();
+
+			string[] data = new string[1];
+
+			// Wait for victory.
+			bool isDone = false;
+			var start = DateTime.Now;
+
+			while (!isDone && ((DateTime.Now - start).TotalSeconds <= 5))
+			{
+				files = System.IO.Directory.GetFiles(journalDir);
+				data = System.IO.Directory.GetFiles(dataDir);
+				isDone = (files.Length == 0 && dataDir.Length == 1 && data.First().Contains("2.json"));
+			}
+
+			Assert.IsNull(client.GetObject<Sword>(id));
+			Assert.AreEqual(masamune, client.GetObject<Sword>(secondId));
 		}
     }
 }
