@@ -24,17 +24,6 @@ namespace InnerDb.Tests
         private Sword murasame = new Sword { Name = "Murasame", Cost = 5000 };
         private dynamic lavos = new Creature() { Name = "Lavos", Disposition = Alignment.Evil };
 
-
-		private void ResetClient()
-		{
-			if (client != null)
-			{
-				client.Stop();
-			}
-			client = new InnerDbClient(TestDbName);
-			client.SetJournalIntervalMilliseconds(JournalInterval);
-		}
-
         [SetUp]
         public void ResetClientAndDeleteDatabase()
         {
@@ -177,7 +166,7 @@ namespace InnerDb.Tests
 		{
 			// Believe me when I say this is very heavily tested already from
 			// the above tests running really fast.
-			client.SetJournalIntervalMilliseconds(10000); // 10s is enough to test it...
+			this.AlmostDisableJournaling();
 
 			int id = client.PutObject(murasame);
 			client.Delete(id);
@@ -212,6 +201,21 @@ namespace InnerDb.Tests
 
 			Assert.IsNull(client.GetObject<Sword>(id));
 			Assert.AreEqual(masamune, client.GetObject<Sword>(secondId));
+		}
+
+		private void ResetClient()
+		{
+			if (client != null)
+			{
+				client.Stop();
+			}
+			client = new InnerDbClient(TestDbName);
+			client.SetJournalIntervalMilliseconds(JournalInterval);
+		}
+
+		private void AlmostDisableJournaling()
+		{			
+			client.SetJournalIntervalMilliseconds(10000); // 10s is enough to test it...
 		}
     }
 }

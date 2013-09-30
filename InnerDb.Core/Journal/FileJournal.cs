@@ -18,7 +18,9 @@ namespace InnerDb.Core.Journal
 		private FileDataStore fileStore;
 		private string directoryName;
 		private bool isRunning = false;
-		private string journalDir;		
+		private string journalDir;
+		private static int nextJournalId = 1;
+		private static readonly int MaxJournalId = 1000000;
 
 		internal static readonly string PutEntryPrefix = "Put";
 		private static readonly string DeleteEntryPrefix = "Delete";
@@ -88,8 +90,9 @@ namespace InnerDb.Core.Journal
 		
 		private string GetPathFor(int id, string journalSuffix)
 		{
-			// Include timestamp so multiple simultaneous entries are executed in order
-			var timestamp = DateTime.Now.ToString("yyyyMMddHHmmssffff");
+			// Include integer so multiple simultaneous entries are executed in order
+			var timestamp = string.Format("J{0}", nextJournalId);
+			nextJournalId = nextJournalId + 1 % MaxJournalId;
 			return string.Format(@"{0}\Journal\{1}_{2}-{3}.json", this.directoryName, timestamp, id, journalSuffix);
 		}
 
@@ -126,11 +129,11 @@ namespace InnerDb.Core.Journal
 				if (filename.EndsWith(string.Format("-{0}.json", PutEntryPrefix)))
 				{
 					var data = DatabaseHelper.Deserialize(filename);
-					this.entries.Add(new PutObjectEntry(data, id));
+					new PutObjectEntry(data, id).Execute(this.fileStore);
 				}
 				else if (filename.EndsWith(string.Format("-{0}.json", DeleteEntryPrefix)))
 				{
-					this.entries.Add(new DeleteObjectEntry(id));
+					new DeleteObjectEntry(id).Execute(fileStore);
 				}
 				else
 				{
