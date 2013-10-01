@@ -12,15 +12,7 @@ namespace InnerDb.Core.Index
 		// Inner: data[fieldValue] => IDs
 		private Dictionary<string, Dictionary<string, List<int>>> indexdata = new Dictionary<string, Dictionary<string, List<int>>>();
 		private Dictionary<T, int> indexedObjectIds = new Dictionary<T, int>();
-
-		//public ReadOnlyCollection<string> IndexedFields
-		//{
-		//    get
-		//    {
-		//        return new ReadOnlyCollection<string>(this.indexdata.Keys.ToList());
-		//    }
-		//}
-
+		
 		public ReadOnlyCollection<T> GetObjectsWhere(string fieldName, string value)
 		{
 			List<T> toReturn = new List<T>();
@@ -40,11 +32,6 @@ namespace InnerDb.Core.Index
 			return new ReadOnlyCollection<T>(toReturn);
 		}
 
-		//public bool IndexesField(string fieldName)
-		//{
-		//    return this.indexdata.ContainsKey(fieldName);
-		//}
-
 		public void IndexObject(T o, int id)
 		{
 			this.indexedObjectIds[o] = id;
@@ -60,13 +47,10 @@ namespace InnerDb.Core.Index
 			// Create index for this field
 			this.indexdata[fieldName] = new Dictionary<string, List<int>>();
 			// Reindex all objects on this field
-			foreach (var o in this.indexedObjectIds.Keys)
-			{
-				this.IndexField(o, this.indexedObjectIds[o], fieldName);
-			}
+			this.Reindex(fieldName);
 		}
 
-		public void Reindex(string fieldName)
+		private void Reindex(string fieldName)
 		{
 			foreach (var o in this.indexedObjectIds.Keys)
 			{

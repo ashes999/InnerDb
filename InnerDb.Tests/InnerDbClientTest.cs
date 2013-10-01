@@ -203,19 +203,6 @@ namespace InnerDb.Tests
 			Assert.AreEqual(masamune, client.GetObject<Sword>(secondId));
 		}
 
-		private void lolwut()
-		{
-			var i = new InnerDb.Core.Index.IndexStore();
-			i.AddIndex(typeof(Sword), "Name");
-			i.IndexObject(masamune, 1);
-			i.AddIndex(typeof(Sword), "Cost");
-			i.IndexObject(murasame, 2);
-			i.RemoveObject(murasame);
-			// End result: i<Sword> has an index with two IndexDatas
-			// i<Sword>[Cost] = { 10k => Masamune Id (1) }, { 5k => Murasame ID (2) }
-			// I<Sword>[Name] = { 1 =< Masamune.Id (1) }, { 5k => Murasame ID (2) }
-		}
-
 		private void ResetClient()
 		{
 			if (client != null)

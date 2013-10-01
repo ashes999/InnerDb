@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections.ObjectModel;
 
 namespace InnerDb.Core.Index
 {
@@ -10,13 +11,7 @@ namespace InnerDb.Core.Index
 		// indexes[Type] = indexes!
 		private IDictionary<Type, IndexData<object>> indexes = new Dictionary<Type, IndexData<object>>();
 
-		//public bool HasIndex<T>(string fieldName)
-		//{
-		//    var type = typeof(T);
-		//    return this.indexes[type] != null && this.indexes[type].IndexesField(fieldName);
-		//}
-
-		public void AddIndex(Type type, string fieldName)
+		public void AddField(Type type, string fieldName)
 		{			
 			if (!this.indexes.ContainsKey(type))
 			{
@@ -46,6 +41,18 @@ namespace InnerDb.Core.Index
 		public void RemoveObject(object o)
 		{
 			this.indexes[o.GetType()].RemoveObject(o);
+		}
+
+		public ReadOnlyCollection<object> GetObjectsWhere(Type type, string fieldName, string value)
+		{
+			if (this.indexes[type] != null)
+			{
+				return this.indexes[type].GetObjectsWhere(fieldName, value);
+			}
+			else
+			{
+				throw new ArgumentException("There are no indexes for " + type.FullName + ".");
+			}
 		}
 	}
 }
