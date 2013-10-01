@@ -23,7 +23,8 @@ namespace InnerDb.Core.DataStore
 			if (!Directory.Exists(directoryName))
 			{
 				Directory.CreateDirectory(directoryName);
-				Directory.CreateDirectory(string.Format(@"{0}\Data", directoryName));			
+				Directory.CreateDirectory(string.Format(@"{0}\Data", directoryName));
+				Directory.CreateDirectory(string.Format(@"{0}\Indexes", directoryName));
 			}
         }
 
