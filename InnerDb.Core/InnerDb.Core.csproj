@@ -48,6 +48,7 @@
     <Compile Include="DataStore\FileDataStore.cs" />
     <Compile Include="DataStore\IDataStore.cs" />
     <Compile Include="DataStore\InMemoryDataStore.cs" />
+    <Compile Include="Index\IndexData.cs" />
     <Compile Include="Index\IndexStore.cs" />
     <Compile Include="InnerDbClient.cs" />
     <Compile Include="Journal\FileJournal.cs" />
