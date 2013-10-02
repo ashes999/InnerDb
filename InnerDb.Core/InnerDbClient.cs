@@ -11,6 +11,7 @@ namespace InnerDb.Core
     public class InnerDbClient : IDisposable
     {
 		private LocalDatabase database = LocalDatabase.Instance;
+		private bool isDisposed = false;
 
         public InnerDbClient(string databaseName)
         {
@@ -62,7 +63,11 @@ namespace InnerDb.Core
 
 		public void Dispose()
 		{
-			this.database.Stop();
+			if (!this.isDisposed)
+			{
+				this.database.Stop();
+				this.isDisposed = true;
+			}
 		}
 	}
 }

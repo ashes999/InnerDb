@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace InnerDb.Tests.TestHelpers
 {
-    class Sword
+	class Sword
     {
         public string Name { get; set; }
         public uint Cost { get; set; }
@@ -31,5 +32,10 @@ namespace InnerDb.Tests.TestHelpers
                 return false;
             }
         }
+
+		public override string ToString()
+		{
+			return string.Format("{0}: cost={1}", this.Name, this.Cost);
+		}
     }
 }

@@ -27,6 +27,11 @@ namespace InnerDb.Tests
         [SetUp]
         public void ResetClientAndDeleteDatabase()
         {
+			if (client != null)
+			{
+				client.Dispose();
+			}
+
 			// Delete DB
 			while (Directory.Exists(TestDbName))
 			{
@@ -149,6 +154,20 @@ namespace InnerDb.Tests
 
 		[Test]
 		public void PutObjectWithIdUpdatesObject()
+		{
+			int id = client.PutObject(masamune);
+			var expected = new Sword() { Name = "Excalibur", Cost = 1 };
+			client.PutObject(expected, id);
+			var actual = client.GetObject<Sword>(id);
+			Assert.AreEqual(expected, actual);
+
+			this.ResetClient();
+			actual = client.GetObject<Sword>(s => s.Name == "Excalibur");
+			Assert.AreEqual(expected, actual);
+		}
+
+		[Test]
+		public void EpicFail()
 		{
 			int id = client.PutObject(masamune);
 			client.AddIndex<Sword>("Name"); // iQ

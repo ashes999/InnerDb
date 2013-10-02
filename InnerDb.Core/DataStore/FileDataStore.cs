@@ -6,23 +6,29 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using InnerDb.Core.Index;
 
 namespace InnerDb.Core.DataStore
 {
     class FileDataStore : IDataStore
     {
         private string directoryName = "";
+		private IndexStore indexStore;
 
         private int nextId = 1;
 
-        public FileDataStore(string databaseName)
+        public FileDataStore(string databaseName, IndexStore indexStore)
         {
-            // TODO: stop cluttering mah file system
 			this.directoryName = databaseName.SantizeForDatabaseName();
+			this.indexStore = indexStore;
 
 			if (!Directory.Exists(directoryName))
 			{
 				Directory.CreateDirectory(directoryName);
+			}
+
+			if (!Directory.Exists(string.Format(@"{0}\Data", directoryName)))
+			{
 				Directory.CreateDirectory(string.Format(@"{0}\Data", directoryName));
 			}
         }
@@ -31,6 +37,19 @@ namespace InnerDb.Core.DataStore
         {
             throw new NotImplementedException();
         }
+
+		public Dictionary<int, T> GetCollectionWithId<T>()
+		{
+			var ids = this.indexStore.GetObjectsOfType<T>();
+			Dictionary<int, T> toReturn = new Dictionary<int, T>();
+
+			foreach (var id in ids)
+			{
+				toReturn[id] = this.GetObject<T>(id);
+			}
+
+			return toReturn;
+		}
 
         public T GetObject<T>(int id)
         {

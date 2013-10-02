@@ -23,10 +23,10 @@ namespace InnerDb.Core
 
 		public void OpenDatabase(string databaseName)
         {
-            fileStore = new FileDataStore(databaseName);
+			indexStore = new IndexStore(databaseName);
+            fileStore = new FileDataStore(databaseName, indexStore);
 			journal = new FileJournal(databaseName, fileStore);
             memoryStore = new InMemoryDataStore(fileStore, journal.DirectoryPath);
-			indexStore = new IndexStore(databaseName);
         }
 
         public List<T> GetCollection<T>()

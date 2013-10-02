@@ -14,6 +14,9 @@ namespace InnerDb.Core.DataStore
         private Dictionary<int, object> data = new Dictionary<int, object>();
         private FileDataStore fileStore;
 
+		// Do we have the latest and greatest of these objects? If so, they're here.
+		private List<Type> synchedWithFileStore = new List<Type>();
+
 		public InMemoryDataStore()
 		{
 		}
@@ -37,12 +40,24 @@ namespace InnerDb.Core.DataStore
 				int id = DatabaseHelper.GetIdFromFilename(filename);
 				var data = DatabaseHelper.Deserialize(filename);
 				this.data[id] = data;
+
+				var type = data.GetType();
+				if (!this.synchedWithFileStore.Contains(type))
+				{
+					this.synchedWithFileStore.Add(type);
+				}
 			}
         }
         
         public List<T> GetCollection<T>()
         {
             var toReturn = new List<T>();
+
+			if (!this.synchedWithFileStore.Contains(typeof(T)))
+			{
+				this.SynchWithFileStore<T>();
+			}
+
             foreach (var value in data.Values)
             {
                 if (value is T)
@@ -56,6 +71,11 @@ namespace InnerDb.Core.DataStore
 
         public T GetObject<T>(int id)
         {
+			if (!this.synchedWithFileStore.Contains(typeof(T)))
+			{
+				this.SynchWithFileStore<T>();
+			}
+
             var toReturn = data[id];
             if (toReturn is T)
             {
@@ -93,6 +113,21 @@ namespace InnerDb.Core.DataStore
 			else
 			{
 				throw new ArgumentException("There's no object with ID " + id + " to delete.");
+			}
+		}
+
+		private void SynchWithFileStore<T>()
+		{
+			Dictionary<int, T> found = this.fileStore.GetCollectionWithId<T>();
+			foreach (var kvp in found)
+			{
+				this.data[kvp.Key] = kvp.Value;
+			}
+			
+			var type = typeof(T);
+			if (!this.synchedWithFileStore.Contains(type))
+			{
+				this.synchedWithFileStore.Add(type);
 			}
 		}
 	}

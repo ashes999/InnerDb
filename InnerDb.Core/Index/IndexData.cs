@@ -54,14 +54,6 @@ namespace InnerDb.Core.Index
 			this.Reindex(fieldName);
 		}
 
-		private void Reindex(string fieldName)
-		{
-			foreach (var o in this.indexedObjectIds.Keys)
-			{
-				this.IndexField(o, this.indexedObjectIds[o], fieldName);
-			}
-		}
-
 		public void RemoveObject(T o)
 		{
 			if (this.indexedObjectIds.ContainsKey(o))
@@ -110,5 +102,22 @@ namespace InnerDb.Core.Index
 			}
 		}
 
+		private void Reindex(string fieldName)
+		{
+			foreach (var o in this.indexedObjectIds.Keys)
+			{
+				this.IndexField(o, this.indexedObjectIds[o], fieldName);
+			}
+		}
+
+		public ReadOnlyCollection<int> GetObjectIds()
+		{
+			var toReturn = new List<int>();
+			foreach (var o in this.indexedObjectIds.Keys)
+			{
+				toReturn.Add(this.indexedObjectIds[o]);
+			}
+			return new ReadOnlyCollection<int>(toReturn);
+		}
 	}
 }

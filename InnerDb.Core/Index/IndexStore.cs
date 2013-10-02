@@ -65,6 +65,19 @@ namespace InnerDb.Core.Index
 			}
 		}
 
+		public ReadOnlyCollection<int> GetObjectsOfType<T>()
+		{
+			var type = typeof(T);
+			if (this.indexes.ContainsKey(type))
+			{
+				return this.indexes[type].GetObjectIds();
+			}
+			else
+			{
+				return new ReadOnlyCollection<int>(new List<int>());
+			}
+		}
+
 		internal void SerializeIndexes()
 		{
 			foreach (var index in this.indexes)
