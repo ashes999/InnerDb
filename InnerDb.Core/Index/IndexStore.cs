@@ -3,18 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace InnerDb.Core.Index
 {
 	public class IndexStore
 	{
 		// indexes[Type] = indexes!
-		private IDictionary<Type, IndexData<object>> indexes = new Dictionary<Type, IndexData<object>>();
+		private Dictionary<Type, IndexData<object>> indexes = new Dictionary<Type, IndexData<object>>();
 		private string directoryName;
 
 		public IndexStore(string databaseName)
 		{
 			this.directoryName = databaseName.SantizeForDatabaseName();
+			Directory.CreateDirectory(string.Format(@"{0}\Indexes", this.directoryName));
+			this.DeserializeIndexes();
 		}
 
 		public void AddField(Type type, string fieldName)
@@ -32,7 +36,7 @@ namespace InnerDb.Core.Index
 			var type = o.GetType();
 			if (!this.indexes.ContainsKey(type))
 			{
-				throw new ArgumentException("Not indexing " + type.FullName + " yet. Call AddIndex first.");
+				this.indexes[type] = new IndexData<object>();
 			}
 			else
 			{
@@ -60,5 +64,28 @@ namespace InnerDb.Core.Index
 				throw new ArgumentException("There are no indexes for " + type.FullName + ".");
 			}
 		}
+
+		internal void SerializeIndexes()
+		{
+			foreach (var index in this.indexes)
+			{
+				string indexName = index.Key.FullName;
+				string json = JsonConvert.SerializeObject(index);
+				File.WriteAllText(string.Format(@"{0}\Indexes\{1}.idx", this.directoryName, indexName), json);
+			}
+		}
+
+		private void DeserializeIndexes()
+		{
+			foreach (var indexFile in Directory.GetFiles(string.Format(@"{0}\Indexes", this.directoryName)))
+			{
+				string contents = File.ReadAllText(indexFile);
+				var index = (KeyValuePair<Type, IndexData<object>>)
+					JsonConvert.DeserializeObject(contents,
+					typeof(KeyValuePair<Type, IndexData<object>>));
+				this.indexes[index.Key] = index.Value;
+			}
+		}
+
 	}
 }

@@ -151,6 +151,8 @@ namespace InnerDb.Tests
 		public void PutObjectWithIdUpdatesObject()
 		{
 			int id = client.PutObject(masamune);
+			client.AddIndex<Sword>("Name"); // iQ
+
 			var expected = new Sword() { Name = "Excalibur", Cost = 1 };
 			client.PutObject(expected, id);
 			var actual = client.GetObject<Sword>(id);
@@ -207,7 +209,7 @@ namespace InnerDb.Tests
 		{
 			if (client != null)
 			{
-				client.Stop();
+				client.Dispose();
 			}
 			client = new InnerDbClient(TestDbName);
 			client.SetJournalIntervalMilliseconds(JournalInterval);

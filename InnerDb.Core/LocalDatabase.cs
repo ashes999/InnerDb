@@ -56,9 +56,11 @@ namespace InnerDb.Core
 			{
 				id = fileStore.GetKeyForNewObject(obj);
 			}
+			
 			memoryStore.PutObject(obj, id);
 			journal.RecordWrite(obj, id);
-            // TODO: verify journal here
+			indexStore.IndexObject(obj, id);
+
             return id;
         }
 
@@ -66,7 +68,6 @@ namespace InnerDb.Core
 		{
 			memoryStore.Delete(id);
 			journal.RecordDelete(id);
-			// TODO: verify journal
 		}
 
         public void DeleteDatabase()
@@ -83,9 +84,10 @@ namespace InnerDb.Core
 				.Select(o => o as T).ToList());
 		}
 
-		internal void StopJournal()
+		internal void Stop()
 		{
 			this.journal.Stop();
+			this.indexStore.SerializeIndexes();
 		}
 
 		internal void SetJournalIntervalMillseconds(uint milliseconds)

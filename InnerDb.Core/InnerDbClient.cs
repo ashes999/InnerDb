@@ -8,7 +8,7 @@ using System.Collections.ObjectModel;
 
 namespace InnerDb.Core
 {
-    public class InnerDbClient
+    public class InnerDbClient : IDisposable
     {
 		private LocalDatabase database = LocalDatabase.Instance;
 
@@ -46,11 +46,6 @@ namespace InnerDb.Core
 			this.database.DeleteDatabase();
         }
 
-		public void Stop()
-		{
-			this.database.StopJournal();
-		}
-
 		public void SetJournalIntervalMilliseconds(uint milliseconds)
 		{
 			this.database.SetJournalIntervalMillseconds(milliseconds);
@@ -63,6 +58,11 @@ namespace InnerDb.Core
 		public ReadOnlyCollection<T> GetCollectionFromIndex<T>(string fieldName, string value) where T : class
 		{
 			return this.database.GetCollectionFromIndex<T>(fieldName, value);
+		}
+
+		public void Dispose()
+		{
+			this.database.Stop();
 		}
 	}
 }

@@ -24,7 +24,6 @@ namespace InnerDb.Core.DataStore
 			{
 				Directory.CreateDirectory(directoryName);
 				Directory.CreateDirectory(string.Format(@"{0}\Data", directoryName));
-				Directory.CreateDirectory(string.Format(@"{0}\Indexes", directoryName));
 			}
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
+using Newtonsoft.Json;
 
 namespace InnerDb.Core.Index
 {
@@ -10,15 +11,18 @@ namespace InnerDb.Core.Index
 	{
 		// Outer: data[fieldName] => Inner
 		// Inner: data[fieldValue] => IDs
-		private Dictionary<string, Dictionary<string, List<int>>> indexdata = new Dictionary<string, Dictionary<string, List<int>>>();
+		[JsonPropertyAttribute(DefaultValueHandling = DefaultValueHandling.Include)]
+		private Dictionary<string, Dictionary<string, List<int>>> indexedData = new Dictionary<string, Dictionary<string, List<int>>>();
+
+		[JsonPropertyAttribute(DefaultValueHandling = DefaultValueHandling.Include)]
 		private Dictionary<T, int> indexedObjectIds = new Dictionary<T, int>();
 		
 		public ReadOnlyCollection<T> GetObjectsWhere(string fieldName, string value)
 		{
 			List<T> toReturn = new List<T>();
-			if (indexdata.ContainsKey(fieldName))
+			if (indexedData.ContainsKey(fieldName))
 			{
-				var outer = indexdata[fieldName];
+				var outer = indexedData[fieldName];
 				if (outer.ContainsKey(value))
 				{
 					var inner = outer[value];
@@ -36,7 +40,7 @@ namespace InnerDb.Core.Index
 		{
 			this.indexedObjectIds[o] = id;
 
-			foreach (string fieldName in this.indexdata.Keys)
+			foreach (string fieldName in this.indexedData.Keys)
 			{
 				IndexField(o, id, fieldName);
 			}
@@ -45,7 +49,7 @@ namespace InnerDb.Core.Index
 		public void AddField(string fieldName)
 		{
 			// Create index for this field
-			this.indexdata[fieldName] = new Dictionary<string, List<int>>();
+			this.indexedData[fieldName] = new Dictionary<string, List<int>>();
 			// Reindex all objects on this field
 			this.Reindex(fieldName);
 		}
@@ -64,12 +68,12 @@ namespace InnerDb.Core.Index
 			{
 				int id = this.indexedObjectIds[o];
 
-				foreach (var fieldName in this.indexdata.Keys)
+				foreach (var fieldName in this.indexedData.Keys)
 				{
 					string value = o.GetType().GetProperty(fieldName).GetValue(o, null).ToString();
-					if (this.indexdata[fieldName].ContainsKey(value))
+					if (this.indexedData[fieldName].ContainsKey(value))
 					{
-						var index = this.indexdata[fieldName][value];
+						var index = this.indexedData[fieldName][value];
 						index.Remove(id);
 					}
 				}
@@ -88,19 +92,19 @@ namespace InnerDb.Core.Index
 				if (value != null)
 				{
 					// Are we indexing this field?
-					if (!this.indexdata.ContainsKey(fieldName))
+					if (!this.indexedData.ContainsKey(fieldName))
 					{
-						this.indexdata[fieldName] = new Dictionary<string, List<int>>();
+						this.indexedData[fieldName] = new Dictionary<string, List<int>>();
 					}
 					// Does the index for this field, index this value?
-					if (!this.indexdata[fieldName].ContainsKey(value))
+					if (!this.indexedData[fieldName].ContainsKey(value))
 					{
-						this.indexdata[fieldName][value] = new List<int>();
+						this.indexedData[fieldName][value] = new List<int>();
 					}
 					// Does thie list of ints with this value, have this ID?
-					if (!this.indexdata[fieldName][value].Contains(id))
+					if (!this.indexedData[fieldName][value].Contains(id))
 					{
-						this.indexdata[fieldName][value].Add(id);
+						this.indexedData[fieldName][value].Add(id);
 					}
 				}
 			}
