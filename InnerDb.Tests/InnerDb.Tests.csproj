@@ -44,8 +44,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataStore\FileStoreTest.cs" />
     <Compile Include="Index\IndexDataTest.cs" />
     <Compile Include="Index\IndexStoreTest.cs" />
+    <Compile Include="DataStore\InMemoryDataStoreTest.cs" />
     <Compile Include="InnerDbClientTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestHelpers\Car.cs" />

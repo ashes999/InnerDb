@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using InnerDb.Core.DataStore;
 using InnerDb.Core.Journal;
+using InnerDb.Core.Index;
+using System.Collections.ObjectModel;
 
 namespace InnerDb.Core
 {
@@ -15,6 +17,7 @@ namespace InnerDb.Core
 		private FileDataStore fileStore; // Primary source of truth
 		private FileJournal journal; 
 		private InMemoryDataStore memoryStore;
+		private IndexStore indexStore;
 
 		private LocalDatabase() { }
 
@@ -23,6 +26,7 @@ namespace InnerDb.Core
             fileStore = new FileDataStore(databaseName);
 			journal = new FileJournal(databaseName, fileStore);
             memoryStore = new InMemoryDataStore(fileStore, journal.DirectoryPath);
+			indexStore = new IndexStore(databaseName);
         }
 
         public List<T> GetCollection<T>()
@@ -72,6 +76,13 @@ namespace InnerDb.Core
 			this.fileStore.DeleteDatabase();
         }
 
+		public ReadOnlyCollection<T> GetCollectionFromIndex<T>(string fieldName, string value) where T : class
+		{
+			return new ReadOnlyCollection<T>(
+				this.indexStore.GetObjectsWhere(typeof(T), fieldName, value)
+				.Select(o => o as T).ToList());
+		}
+
 		internal void StopJournal()
 		{
 			this.journal.Stop();
@@ -81,5 +92,10 @@ namespace InnerDb.Core
 		{
 			this.journal.JournalIntervalSeconds = milliseconds;
 		}
+
+		internal void AddIndex<T>(string fieldName)
+		{
+			this.indexStore.AddField(typeof(T), fieldName);
+		}		
 	}
 }

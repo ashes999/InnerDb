@@ -5,6 +5,7 @@ using System.Text;
 using NUnit.Framework;
 using InnerDb.Core.Index;
 using InnerDb.Tests.TestHelpers;
+using InnerDb.Core;
 
 namespace InnerDb.Tests.Index
 {
@@ -18,7 +19,7 @@ namespace InnerDb.Tests.Index
 		public void GetObjectsWhereReturnsOnlyIndexedObjectsByFieldValue()
 		{
 			var type = typeof(Car);
-			var i = new IndexStore();
+			var i = new IndexStore("TestDb");
 
 			i.AddField(typeof(Car), "Make");
 			i.IndexObject(civic, 1);

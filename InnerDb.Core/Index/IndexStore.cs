@@ -10,6 +10,12 @@ namespace InnerDb.Core.Index
 	{
 		// indexes[Type] = indexes!
 		private IDictionary<Type, IndexData<object>> indexes = new Dictionary<Type, IndexData<object>>();
+		private string directoryName;
+
+		public IndexStore(string databaseName)
+		{
+			this.directoryName = databaseName.SantizeForDatabaseName();
+		}
 
 		public void AddField(Type type, string fieldName)
 		{			

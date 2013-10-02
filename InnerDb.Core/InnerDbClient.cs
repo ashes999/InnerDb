@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using InnerDb.Core.DataStore;
+using System.Collections.ObjectModel;
 
 namespace InnerDb.Core
 {
@@ -53,6 +54,15 @@ namespace InnerDb.Core
 		public void SetJournalIntervalMilliseconds(uint milliseconds)
 		{
 			this.database.SetJournalIntervalMillseconds(milliseconds);
+		}
+
+		public void AddIndex<T>(string fieldName) {
+			this.database.AddIndex<T>(fieldName);
+		}
+
+		public ReadOnlyCollection<T> GetCollectionFromIndex<T>(string fieldName, string value) where T : class
+		{
+			return this.database.GetCollectionFromIndex<T>(fieldName, value);
 		}
 	}
 }

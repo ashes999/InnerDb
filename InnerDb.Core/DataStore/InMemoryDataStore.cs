@@ -14,6 +14,10 @@ namespace InnerDb.Core.DataStore
         private Dictionary<int, object> data = new Dictionary<int, object>();
         private FileDataStore fileStore;
 
+		public InMemoryDataStore()
+		{
+		}
+
         public InMemoryDataStore(FileDataStore fileStore, string journalDirectory)
         {
             this.fileStore = fileStore;

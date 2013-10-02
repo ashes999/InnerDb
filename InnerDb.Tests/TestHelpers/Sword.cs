@@ -11,6 +11,14 @@ namespace InnerDb.Tests.TestHelpers
         public string Name { get; set; }
         public uint Cost { get; set; }
 
+		public Sword() { }
+
+		public Sword(string name, uint cost)
+		{
+			this.Name = name;
+			this.Cost = cost;
+		}
+
         public override bool Equals(object obj)
         {
             if (obj is Sword)
