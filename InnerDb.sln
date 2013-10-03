@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnerDb.Core", "InnerDb.Core\InnerDb.Core.csproj", "{7E68CA50-6617-4B65-BECF-EEA38C7E1FA4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InnerDb.Tests", "InnerDb.Tests\InnerDb.Tests.csproj", "{4F54A799-26C1-4511-9D8D-EB64E1A6645C}"
@@ -8,6 +8,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5A677389-CBEA-4220-908A-038339336AC8}"
 	ProjectSection(SolutionItems) = preProject
 		readme.md = readme.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{480705F6-BAA2-4B7F-AB2F-7DF4D8F2AAA5}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
 Global
