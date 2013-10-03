@@ -6,23 +6,31 @@ using InnerDb.Core.DataStore;
 using InnerDb.Core.Journal;
 using InnerDb.Core.Index;
 using System.Collections.ObjectModel;
+using InnerDb.Core.Compression;
+using System.IO;
 
 namespace InnerDb.Core
 {
-	class LocalDatabase
+	class LocalDatabase : IDisposable
 	{
-		private static LocalDatabase instance = new LocalDatabase();
-		public static LocalDatabase Instance { get { return instance; } }
-		
 		private FileDataStore fileStore; // Primary source of truth
 		private FileJournal journal; 
 		private InMemoryDataStore memoryStore;
 		private IndexStore indexStore;
+		private string databaseName;
+		private bool isDisposed = false;
 
-		private LocalDatabase() { }
-
-		public void OpenDatabase(string databaseName)
+		public LocalDatabase(string databaseName)
         {
+			this.databaseName = databaseName.SantizeForDatabaseName();
+
+			string archiveName = GetDatabaseFileName(databaseName);
+			if (File.Exists(archiveName))
+			{
+				GzipHelper.DecompressFiles(archiveName);
+				File.Delete(archiveName);
+			}
+
 			indexStore = new IndexStore(databaseName);
             fileStore = new FileDataStore(databaseName, indexStore);
 			journal = new FileJournal(databaseName, fileStore);
@@ -84,10 +92,15 @@ namespace InnerDb.Core
 				.Select(o => o as T).ToList());
 		}
 
-		internal void Stop()
+		public void Dispose()
 		{
-			this.journal.Stop();
-			this.indexStore.SerializeIndexes();
+			if (!this.isDisposed)
+			{
+				this.isDisposed = true;
+				this.journal.Stop();
+				this.indexStore.SerializeIndexes();
+				this.CreateDatabaseArchive();
+			}
 		}
 
 		internal void SetJournalIntervalMillseconds(uint milliseconds)
@@ -98,6 +111,18 @@ namespace InnerDb.Core
 		internal void AddIndex<T>(string fieldName)
 		{
 			this.indexStore.AddField(typeof(T), fieldName);
-		}		
+		}
+
+		private string GetDatabaseFileName(string databaseName)
+		{
+			return string.Format("{0}.innerdb", databaseName);
+		}
+
+		private void CreateDatabaseArchive()
+		{
+			var archiveName = this.GetDatabaseFileName(this.databaseName);
+			GzipHelper.CompressFiles(this.databaseName, archiveName);
+			Directory.Delete(this.databaseName, true);
+		}
 	}
 }

@@ -10,6 +10,7 @@ using InnerDb.Tests.TestHelpers;
 using NUnit.Framework;
 using System.IO;
 using System.Threading;
+using InnerDb.Core.Compression;
 
 namespace InnerDb.Tests
 {
@@ -33,6 +34,14 @@ namespace InnerDb.Tests
 						Directory.Delete(dir, true);
 					}
 					catch { }
+				}
+			}
+
+			foreach (var zip in Directory.GetFiles(".", "*.innerdb"))
+			{
+				while (File.Exists(zip))
+				{
+					File.Delete(zip);
 				}
 			}
 		}
@@ -270,6 +279,31 @@ namespace InnerDb.Tests
 				Assert.IsNull(client.GetObject<Sword>(id));
 				Assert.AreEqual(masamune, client.GetObject<Sword>(secondId));
 			}
+		}
+
+		[Test]
+		public void DatabaseZipsAndUnzipsOnStartupAndShutdownRespectively()
+		{
+			string dbName = "ZipMe";
+			string archiveName = "ZipMe.innerdb";
+
+			using (var c = new InnerDbClient(dbName))
+			{
+				c.PutObject(masamune);
+				c.PutObject(lavos);				
+			}
+
+			Assert.IsFalse(Directory.Exists(dbName));
+			Assert.IsTrue(File.Exists(archiveName));
+
+			using (var c = new InnerDbClient(dbName))
+			{
+				Assert.IsTrue(Directory.Exists(dbName));
+				Assert.IsFalse(File.Exists(archiveName));
+			}
+
+			Assert.IsFalse(Directory.Exists(dbName));
+			Assert.IsTrue(File.Exists(archiveName));
 		}
     }
 }

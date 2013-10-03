@@ -84,7 +84,7 @@ namespace InnerDb.Core.Index
 			{
 				string indexName = index.Key.FullName;
 				string json = JsonConvert.SerializeObject(index);
-				File.WriteAllText(string.Format(@"{0}\Indexes\{1}.idx", this.directoryName, indexName), json);
+				File.WriteAllText(string.Format(@"{0}\Indexes\{1}.index", this.directoryName, indexName), json);
 			}
 		}
 

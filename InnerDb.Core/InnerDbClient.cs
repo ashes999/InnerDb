@@ -10,12 +10,12 @@ namespace InnerDb.Core
 {
     public class InnerDbClient : IDisposable
     {
-		private LocalDatabase database = LocalDatabase.Instance;
+		private LocalDatabase database;
 		private bool isDisposed = false;
 
         public InnerDbClient(string databaseName)
         {
-			this.database.OpenDatabase(databaseName);
+			this.database = new LocalDatabase(databaseName);
         }
 
         public List<T> GetCollection<T>()
@@ -65,7 +65,7 @@ namespace InnerDb.Core
 		{
 			if (!this.isDisposed)
 			{
-				this.database.Stop();
+				this.database.Dispose();
 				this.isDisposed = true;
 			}
 		}
