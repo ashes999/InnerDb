@@ -11,6 +11,8 @@ namespace InnerDb.Core.Journal
 {
 	class FileJournal
 	{
+		internal string DirectoryPath { get { return this.directoryName; } }
+
 		private uint journalIntervalMilliseconds = 100;
 		private IList<JournalEntry> entries = new List<JournalEntry>();
 		private string databaseName;
@@ -86,8 +88,30 @@ namespace InnerDb.Core.Journal
 			File.Create(fileName);
 		}
 
-		internal string DirectoryPath { get { return this.directoryName; } }
-		
+		internal void DeleteDatabase()
+		{
+			this.Stop();
+			while (Directory.Exists(this.journalDir))
+			{
+				try
+				{
+					Directory.Delete(this.journalDir, true);
+				}
+				catch
+				{
+					// Listen, doc, the background thread spins real fast in a test environment
+					// where we're adding/deleting tons of stuff every second. It's almost impossible
+					// to avoid concurrent file access in that (production-artificial) enviornment.
+					// Just play it cool, and delete atomicly.
+				}
+			}
+		}
+
+		internal void Stop()
+		{
+			this.queueTimer.Stop();
+			this.isRunning = false;
+		}
 		private string GetPathFor(int id, string journalSuffix)
 		{
 			// Include integer so multiple simultaneous entries are executed in order
@@ -178,31 +202,6 @@ namespace InnerDb.Core.Journal
 			{
 				fileStore.Delete(this.Id);
 			}
-		}
-
-		internal void DeleteDatabase()
-		{
-			this.Stop();
-			while (Directory.Exists(this.journalDir))
-			{
-				try
-				{
-					Directory.Delete(this.journalDir, true);
-				}
-				catch
-				{
-					// Listen, doc, the background thread spins real fast in a test environment
-					// where we're adding/deleting tons of stuff every second. It's almost impossible
-					// to avoid concurrent file access in that (production-artificial) enviornment.
-					// Just play it cool, and delete atomicly.
-				}
-			}
-		}
-
-		internal void Stop()
-		{
-			this.queueTimer.Stop();
-			this.isRunning = false;
 		}
 	}
 }

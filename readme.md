@@ -22,3 +22,9 @@ InnerDb isn't everything. It's not an enterprise database. We don't intend to su
 - Remote deployments (eg. application is on one machine and talks over the network to the database)
 - Sharding
 - Scheduled backups
+
+Current Limitations
+===================
+Currently:
+- **IDs must be unique.** Using duplicate IDs (even across types) will cause issues. The client will generally manage IDs for you.
+- **All types must implement Equals.** Since we serialize/deserialize, we can't rely on equivalent references.
