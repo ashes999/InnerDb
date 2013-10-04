@@ -36,6 +36,7 @@ namespace InnerDb.Tests.Journal
 			finally
 			{
 				journal.DeleteDatabase();
+				Directory.Delete("Interval");
 			}
 		}
 

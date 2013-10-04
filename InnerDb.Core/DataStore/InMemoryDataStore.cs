@@ -16,11 +16,7 @@ namespace InnerDb.Core.DataStore
 
 		// Do we have the latest and greatest of these objects? If so, they're here.
 		private List<Type> synchedWithFileStore = new List<Type>();
-
-		public InMemoryDataStore()
-		{
-		}
-
+		
         public InMemoryDataStore(FileDataStore fileStore, string journalDirectory)
         {
             this.fileStore = fileStore;
@@ -98,12 +94,6 @@ namespace InnerDb.Core.DataStore
             this.data.Clear();
         }
 
-		internal bool HasObject(int id)
-		{
-			return this.data.ContainsKey(id);
-		}
-
-
 		public void Delete(int id)
 		{
 			if (this.HasObject(id))
@@ -114,6 +104,11 @@ namespace InnerDb.Core.DataStore
 			{
 				throw new ArgumentException("There's no object with ID " + id + " to delete.");
 			}
+		}
+
+		internal bool HasObject(int id)
+		{
+			return this.data.ContainsKey(id);
 		}
 
 		private void SynchWithFileStore<T>()
