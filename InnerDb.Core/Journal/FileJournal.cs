@@ -77,7 +77,6 @@ namespace InnerDb.Core.Journal
 		{
 			this.entries.Add(new PutObjectEntry(data, id));
 			string fileName = GetPathFor(id, PutEntryPrefix);
-
 			File.WriteAllText(fileName, data.Serialize());
 		}
 
