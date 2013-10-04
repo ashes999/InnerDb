@@ -32,7 +32,7 @@ namespace InnerDb.Tests.Index
 			Assert.Contains(benz, i.GetObjectsWhere(type, "Make", benz.Make));
 			Assert.Contains(benz, i.GetObjectsWhere(type, "Model", benz.Model.ToString()));
 
-			i.RemoveObject(civic);
+			i.RemoveObject(1);
 			Assert.IsFalse(i.GetObjectsWhere(type, "Make", civic.Make).Contains(civic));
 			Assert.IsFalse(i.GetObjectsWhere(type, "Model", civic.Model.ToString()).Contains(civic));
 

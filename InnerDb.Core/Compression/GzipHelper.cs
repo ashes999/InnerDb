@@ -22,21 +22,31 @@ namespace InnerDb.Core.Compression
 				foreach (var filename in files)
 				{
 					var entry = new ZipEntry(filename);
+					bool isProcessed = false;
 
-					using (var stream = File.OpenRead(filename))
+					while (!isProcessed)
 					{
-						crc.Reset();
-						outputStream.PutNextEntry(entry);
+						try
+						{
+							using (var stream = File.OpenRead(filename))
+							{
+								crc.Reset();
+								outputStream.PutNextEntry(entry);
 
-						var buffer = new byte[stream.Length];
-						var bytesRead = stream.Read(buffer, 0, (int)stream.Length);
-						outputStream.Write(buffer, 0, bytesRead);
-						crc.Update(buffer, 0, bytesRead);
+								var buffer = new byte[stream.Length];
+								var bytesRead = stream.Read(buffer, 0, (int)stream.Length);
+								outputStream.Write(buffer, 0, bytesRead);
+								crc.Update(buffer, 0, bytesRead);
 
-						entry.Crc = crc.Value;
-						entry.DateTime = File.GetCreationTime(filename);
-						entry.Size = stream.Length;
-						stream.Close();
+								entry.Crc = crc.Value;
+								entry.DateTime = File.GetCreationTime(filename);
+								entry.Size = stream.Length;
+								stream.Close();
+							}
+
+							isProcessed = true;
+						}
+						catch { }
 					}
 				}
 			}

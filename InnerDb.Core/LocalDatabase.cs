@@ -75,6 +75,7 @@ namespace InnerDb.Core
 		public void Delete(int id)
 		{
 			memoryStore.Delete(id);
+			indexStore.RemoveObject(id);
 			journal.RecordDelete(id);
 		}
 

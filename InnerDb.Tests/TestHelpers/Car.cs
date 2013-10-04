@@ -17,5 +17,20 @@ namespace InnerDb.Tests.TestHelpers
 			this.Model = model;
 			this.Colour = colour;
 		}
+
+		public override bool Equals(object obj)
+		{
+			if (obj is Car)
+			{
+				var target = obj as Car;
+				return this.Make == target.Make && 
+					this.Model == target.Model && 
+					this.Colour == target.Colour;
+			}
+			else
+			{
+				return false;
+			}
+		}
 	}
 }

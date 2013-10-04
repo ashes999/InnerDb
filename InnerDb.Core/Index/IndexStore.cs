@@ -38,19 +38,26 @@ namespace InnerDb.Core.Index
 			{
 				this.indexes[type] = new IndexData<object>();
 			}
-			else
-			{
-				var index = this.indexes[type];
-				// Remove from all indicies
-				index.RemoveObject(o);
-				// Index all fields that have an index
-				index.IndexObject(o, id);
-			}
+
+			var index = this.indexes[type];
+			// Remove from all indicies
+			index.RemoveObject(o);
+			// Index all fields that have an index
+			index.IndexObject(o, id);
 		}
 
-		public void RemoveObject(object o)
+		public void RemoveObject(int id)
 		{
-			this.indexes[o.GetType()].RemoveObject(o);
+			//this.indexes[o.GetType()].RemoveObject(o);
+			// Not knowing the type, we must brute-force search :(
+			foreach (var index in this.indexes.Values) {
+				// TODO: if IDs are not unique *across* objects, this will fail
+				if (index.GetObjectIds().Any(i => i == id))
+				{
+					index.RemoveObject(id);
+					break;
+				}
+			}
 		}
 
 		public ReadOnlyCollection<object> GetObjectsWhere(Type type, string fieldName, string value)
@@ -88,6 +95,20 @@ namespace InnerDb.Core.Index
 			}
 		}
 
+		internal bool HasObject(int id)
+		{
+			foreach (var index in this.indexes.Values)
+			{
+				// TODO: if IDs are not unique *across* objects, this will fail
+				if (index.GetObjectIds().Any(i => i == id))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		private void DeserializeIndexes()
 		{
 			foreach (var indexFile in Directory.GetFiles(string.Format(@"{0}\Indexes", this.directoryName)))
@@ -99,6 +120,5 @@ namespace InnerDb.Core.Index
 				this.indexes[index.Key] = index.Value;
 			}
 		}
-
 	}
 }

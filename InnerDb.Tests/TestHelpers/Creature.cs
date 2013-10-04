@@ -11,6 +11,12 @@ namespace InnerDb.Tests.TestHelpers
         public string Name { get; set; }
         public Alignment Disposition { get; set; }
 
+		public Creature(string name, Alignment alignment)
+		{
+			this.Name = name;
+			this.Disposition = alignment;
+		}
+
         public override bool Equals(object obj)
         {
             if (obj is Creature)

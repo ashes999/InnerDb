@@ -54,6 +54,15 @@ namespace InnerDb.Core.Index
 			this.Reindex(fieldName);
 		}
 
+		public void RemoveObject(int id)
+		{
+			if (this.indexedObjectIds.Values.Contains(id))
+			{
+				var found = this.indexedObjectIds.First(kvp => kvp.Value == id);
+				this.RemoveObject(found.Key);
+			}
+		}
+
 		public void RemoveObject(T o)
 		{
 			if (this.indexedObjectIds.ContainsKey(o))

@@ -18,9 +18,9 @@ namespace InnerDb.Tests
     class InnerDbClientTest
     {        
 	    // Helper objects
-        private Sword masamune = new Sword() { Name = "Masamune", Cost = 10000 };
-        private Sword murasame = new Sword { Name = "Murasame", Cost = 5000 };
-        private dynamic lavos = new Creature() { Name = "Lavos", Disposition = Alignment.Evil };
+        private Sword masamune = new Sword("Masamune", 10000);
+        private Sword murasame = new Sword("Murasame", 5000);
+		private dynamic lavos = new Creature("Ogre", Alignment.Evil);
 
 		[SetUp]
 		public void DeleteAllDatabases()
@@ -134,9 +134,9 @@ namespace InnerDb.Tests
         {
 			using (var client = new InnerDbClient("EnumSerialization"))
 			{
-				var expected = new Creature() { Name = "Chrono", Disposition = Alignment.Good };
+				var expected = new Creature("Dove", Alignment.Good);
 				int id = client.PutObject(expected);
-				var actual = client.GetObject<Creature>(c => c.Name == "Chrono");
+				var actual = client.GetObject<Creature>(c => c.Name == "Dove");
 				Assert.AreEqual(Alignment.Good, actual.Disposition);
 			}
         }
@@ -168,6 +168,7 @@ namespace InnerDb.Tests
 			using (var client = new InnerDbClient("Delete"))
 			{
 				int swordId = client.PutObject(masamune);
+				Assert.IsNotNull(client.GetObject<Sword>(swordId));
 				Assert.IsNotNull(client.GetObject<Sword>(s => s.Name == "Masamune"));
 				client.Delete(swordId);
 				Assert.IsNull(client.GetObject<Sword>(swordId));
@@ -293,11 +294,13 @@ namespace InnerDb.Tests
 				c.PutObject(lavos);				
 			}
 
+			// Closed DB has a zip
 			Assert.IsFalse(Directory.Exists(dbName));
 			Assert.IsTrue(File.Exists(archiveName));
 
 			using (var c = new InnerDbClient(dbName))
 			{
+				// Active DB has a dir
 				Assert.IsTrue(Directory.Exists(dbName));
 				Assert.IsFalse(File.Exists(archiveName));
 			}

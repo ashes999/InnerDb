@@ -44,7 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataStore\FileStoreTest.cs" />
+    <Compile Include="DataStore\FileDataStoreTest.cs" />
     <Compile Include="Index\IndexDataTest.cs" />
     <Compile Include="Index\IndexStoreTest.cs" />
     <Compile Include="DataStore\InMemoryDataStoreTest.cs" />

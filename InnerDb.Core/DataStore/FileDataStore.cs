@@ -35,6 +35,8 @@ namespace InnerDb.Core.DataStore
 
         public List<T> GetCollection<T>()
         {
+			// This is unnecessary because the InMemoryDataStore has everything.
+			// If this needs to be implemented, you can implement it via GetCollectionWithId<T>
             throw new NotImplementedException();
         }
 
@@ -53,7 +55,9 @@ namespace InnerDb.Core.DataStore
 
         public T GetObject<T>(int id)
         {
-			if (!File.Exists(this.GetPathFor(id)))
+			// If it was freshly deleted, it may be on the file system.
+			// How do we know? Check the index.
+			if (!this.indexStore.HasObject(id) || !File.Exists(this.GetPathFor(id)))
             {
                 return default(T);                        
             } else {

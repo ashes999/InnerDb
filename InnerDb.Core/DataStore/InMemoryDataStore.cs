@@ -121,7 +121,11 @@ namespace InnerDb.Core.DataStore
 			Dictionary<int, T> found = this.fileStore.GetCollectionWithId<T>();
 			foreach (var kvp in found)
 			{
-				this.data[kvp.Key] = kvp.Value;
+				// Put object was not persisted
+				if (kvp.Value != null)
+				{
+					this.data[kvp.Key] = kvp.Value;
+				}
 			}
 			
 			var type = typeof(T);
