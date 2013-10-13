@@ -6,13 +6,13 @@ What It Is
 ==========
 v1.0 should include basic features:
 
-- Connecting and disconnecting clients
-- List, select, and use a database
-- Starting and stopping the database
-- Add, edit, and delete operations
-- Indexing on fields
-- Atomic transactions
-- Data lives in a zip file
+- Connecting and disconnecting clients (done)
+- List, select, and use a database (done)
+- Starting and stopping the database (done)
+- Add, edit, and delete operations (done)
+- Indexing on fields (done)
+- Atomic and isolated transactions (in progress)
+- Data lives in a zip file (done)
 - Statistics monitoring (table scans vs. index lookups)
 
 What It Isn't
