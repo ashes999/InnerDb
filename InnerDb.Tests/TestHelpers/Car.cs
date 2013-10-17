@@ -32,5 +32,10 @@ namespace InnerDb.Tests.TestHelpers
 				return false;
 			}
 		}
+
+        public override string ToString()
+        {
+            return string.Format("{0} {1} {2}", this.Colour, this.Make, this.Model);
+        }
 	}
 }

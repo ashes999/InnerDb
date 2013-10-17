@@ -6,6 +6,7 @@ using NUnit.Framework;
 using InnerDb.Core.DataStore;
 using InnerDb.Tests.TestHelpers;
 using InnerDb.Core.Index;
+using log4net;
 
 namespace InnerDb.Tests.DataStore
 {
@@ -16,13 +17,24 @@ namespace InnerDb.Tests.DataStore
 		private Car prius = new Car("Toyota", "Prius", "Red");
 		private Creature rat = new Creature("Rat", Alignment.Evil);
 
+        static FileDataStoreTest()
+        {
+            log4net.Config.XmlConfigurator.Configure();
+        }
+
+        [Test]
 		public void GetGetsPutObjects()
 		{
-			var fs = new FileDataStore("GetAndPut", null);
+            var indexStore = new IndexStore("GetAndPut");
+			var fs = new FileDataStore("GetAndPut", indexStore);
 			try
 			{
 				fs.PutObject(fit, 1);
+                indexStore.IndexObject(fit, 1);
+
 				fs.PutObject(prius, 2);
+                indexStore.IndexObject(prius, 2);
+
 				var actual = fs.GetObject<Car>(1);
 				Assert.AreEqual(fit, actual);
 			}
@@ -32,14 +44,21 @@ namespace InnerDb.Tests.DataStore
 			}
 		}
 
-		public void DeleteDeletesObjects()
+        [Test]
+        public void DeleteDeletesObjects()
 		{
-			var fs = new FileDataStore("Deletez", null);
+            var indexStore = new IndexStore("GetAndPut");
+			var fs = new FileDataStore("Deletez", indexStore);
+
 			try
 			{
 				fs.PutObject(fit, 1);
+                indexStore.IndexObject(fit, 1);
+
 				fs.Delete(1);
-				var actual = fs.GetObject<Car>(1);
+                indexStore.RemoveObject(1);
+
+                var actual = fs.GetObject<Car>(1);
 				Assert.IsNull(actual);
 			}
 			finally
@@ -48,7 +67,8 @@ namespace InnerDb.Tests.DataStore
 			}
 		}
 
-		public void GetCollectionWithIdReturnsObjectsByType()
+        [Test]
+        public void GetCollectionWithIdReturnsObjectsByType()
 		{
 			var index = new IndexStore("GetByType");
 			var fs = new FileDataStore("GetByType", index);
